@@ -87,8 +87,8 @@ const onCreateMap = (map: maptilersdk.Map) => {
         midpoint.properties = {
           [FeatureLabelKeys.polygonEdgeLength]: `${length.toFixed(0)} ${UnitSuffix.Feet}`
         };
+        combinedFeatures.push(midpoint);
       }
-      combinedFeatures.push(midpoint);
     } else if (shape === 'line') {
       const coordinates = geoJSON.geometry.coordinates;
       let midpoint: any;
@@ -103,8 +103,8 @@ const onCreateMap = (map: maptilersdk.Map) => {
         midpoint.properties = {
           [FeatureLabelKeys.lineSegmentLength]: `${length.toFixed(0)} ${UnitSuffix.Feet}`
         };
+        combinedFeatures.push(midpoint);
       }
-      combinedFeatures.push(midpoint);
     }
     const labelSource = map.getSource(MEASUREMENT_LABEL_SOURCE_ID);
     if (labelSource) {
