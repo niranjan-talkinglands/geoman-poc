@@ -1,0 +1,21 @@
+@use 'vuetify' with (
+  $color-pack: false,
+  $utilities: false
+);
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.v-application {
+  background: transparent;
+}
+
+* {
+  font-family: 'Quicksand', 'sans-serif';
+}
+
+html {
+  overflow-y: auto !important;
+  color: black;
+}
