@@ -12,7 +12,10 @@ import * as turf from '@turf/turf';
 
 import '@maptiler/sdk/dist/maptiler-sdk.css';
 
-import { Geoman, type GmOptionsPartial } from '@geoman-io/maplibre-geoman-free';
+import {
+  Geoman,
+  type GmOptionsPartial
+} from '@geoman-io/maplibre-geoman-free';
 import '@geoman-io/maplibre-geoman-free/dist/maplibre-geoman.css';
 
 import { UnitSuffix } from '~/utils/constants';
@@ -42,24 +45,12 @@ const onCreateMap = (map: maptilersdk.Map) => {
   const gmOptions: GmOptionsPartial = {
     settings: {},
     layerStyles: {},
-    controls: {
-      draw: {
-        rectangle: {
-          uiEnabled: false
-        },
-        circle_marker: {
-          uiEnabled: false
-        },
-        text_marker: {
-          uiEnabled: false
-        }
-      }
-    }
+
   };
 
   const geoman = new Geoman(map, gmOptions);
 
-  map.on('gm:create', (e: any) => {
+  function addMeasurementLayer(e: any) {
     const { feature, shape } = e;
     const geoJSON = feature.getGeoJson();
 
@@ -114,6 +105,58 @@ const onCreateMap = (map: maptilersdk.Map) => {
         features: combinedFeatures
       });
     }
+  }
+
+  map.on('_gm:draw', (e) => {
+    if (
+      e.action === 'update' &&
+      e.mode === 'line' &&
+      e.variant === 'line_drawer'
+    ) {
+      const geoJSON = e.featureData.getGeoJson();
+      const combinedFeatures: GeoJSON.FeatureCollection['features'] = [];
+
+      const coordinates = geoJSON.geometry.coordinates;
+      let midpoint: any;
+      for (let i = 0; i < coordinates.length - 1; i++) {
+        const startPoint = turf.point(coordinates[i]);
+        const endPoint = turf.point(coordinates[i + 1]);
+        midpoint = turf.midpoint(startPoint, endPoint);
+        let length = turf.distance(startPoint, endPoint, {
+          units: 'feet'
+        });
+
+        length = length === 0 ? undefined : length;
+
+        midpoint.properties = {
+          [FeatureLabelKeys.lineSegmentLength]: `${length.toFixed(0)} ${UnitSuffix.Feet}`
+        };
+        combinedFeatures.push(midpoint);
+      }
+      const labelSource = map.getSource(MEASUREMENT_LABEL_SOURCE_ID);
+      if (labelSource) {
+        //@ts-ignore
+        labelSource.setData({
+          type: 'FeatureCollection',
+          features: combinedFeatures
+        });
+      }
+    }
+  });
+
+  // map?.on('_gm:draw', (e: GMDrawEvent) => {
+  //   console.log(e);
+  //   const { action, type, level, mode } = e;
+  //   if (mode === 'line' && action === 'mode_started') {
+  //   }
+  // });
+
+  map.gm?.setGlobalEventsListener((event: any) => {
+    // if (event.type === 'converted') {
+    //   console.log('Regular event', event);
+    // } else if (event.type === 'system') {
+    //   console.log('System event', event);
+    // }
   });
 };
 
