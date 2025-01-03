@@ -4,7 +4,7 @@ import withNuxt from './.nuxt/eslint.config.mjs';
 export default withNuxt({
   rules: {
     // 'no-undef': 'error', //causing issues with nuxt autoimports
-    'no-console': 'error',
+    'no-console': 'off',
 
     'arrow-spacing': ['error', { before: true, after: true }],
     'no-var': 'error',
